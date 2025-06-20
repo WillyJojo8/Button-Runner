@@ -4,24 +4,44 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public enum GameState { Ready, Playing, Ended };
+public enum GameState { Ready, Playing, Ended, Menu };
 
 public class GameManager : MonoBehaviour
 {
-    public GameState gameState = GameState.Ready;
+    public GameState gameState;
     public RawImage background, platform;
-    public float parallaxSpeed = 0.02f;
-    public GameObject uiReady, uiScore;
+    public float parallaxSpeed;
+    public GameObject uiReady, uiScore, uiMenu;
+    public GameObject player;
+
+    private bool isPaused = false;
+    private Vector3 pausedPlayerPosition; // Store player position when pausing
+    private string pausedAnimationState;
+
+    void Start()
+    {
+        gameState = GameState.Menu;
+        parallaxSpeed = 0.02f;
+    }
 
     void Update()
     {
-        bool action = Input.GetKeyDown("space") || Input.GetMouseButtonDown(0);
+        if (gameState != GameState.Menu)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                HandleTogglePause();
+                return;
+            }
 
-        HandleJump(action);
-        HandleCollisions();
-        UpdateParallax();
-        UpdateGameState(action);
-        HandleExit();
+            bool action = Input.GetKeyDown("space") || Input.GetMouseButtonDown(0);
+
+            HandleJump(action);
+            HandleCollisions();
+            UpdateParallax();
+            UpdateGameState(action);
+            HandleExit();
+        }
     }
 
     void HandleJump(bool action)
@@ -31,6 +51,31 @@ public class GameManager : MonoBehaviour
             PlayerManager.Instance.SetAnimation("PlayerJump");
         }
     }
+
+    public void HandleTogglePause()
+    {
+        if (!isPaused)
+        {
+            // PAUSE
+            isPaused = true;
+            
+            // Store current player position and animation state
+            pausedPlayerPosition = player.transform.position;
+            pausedAnimationState = PlayerManager.Instance.animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerJump") ? "PlayerJump" : "PlayerRun";
+            
+            gameState = GameState.Menu;
+            Time.timeScale = 0f;
+
+            uiReady.SetActive(false);
+            uiScore.SetActive(false);
+            uiMenu.SetActive(true);
+
+            SpawnManager.Instance.PauseSpawn();
+            SpeedManager.Instance.PauseSpeed();
+            player.GetComponent<PlayerManager>().enabled = false;
+        }
+    }
+
 
     void HandleCollisions()
     {
@@ -49,14 +94,17 @@ public class GameManager : MonoBehaviour
         {
             gameState = GameState.Playing;
 
+            Time.timeScale = 1f; // Normal time scale for new game
+
             uiReady.SetActive(false);
             uiScore.SetActive(true);
 
+            player.GetComponent<PlayerManager>().enabled = true;
             PlayerManager.Instance.SetAnimation("PlayerRun");
+
             SpawnManager.Instance.StartSpawn();
             SpeedManager.Instance.StartSpeedIncrease();
         }
-
         else if (gameState == GameState.Ended && action)
         {
             HandleRestart();
@@ -73,13 +121,53 @@ public class GameManager : MonoBehaviour
         }
     }
 
+  public void HandlePlay()
+    {
+        if (isPaused)
+        {
+            // RESUME from pause
+            isPaused = false;
+            gameState = GameState.Playing;
+            
+            // Restore player position and animation
+            player.transform.position = pausedPlayerPosition;
+            
+            Time.timeScale = 1f; // Resume normal time scale
+
+            uiMenu.SetActive(false);
+            uiScore.SetActive(true);
+
+            player.GetComponent<PlayerManager>().enabled = true;
+            
+            // Restore the correct animation state
+            PlayerManager.Instance.SetAnimation(pausedAnimationState);
+
+            SpawnManager.Instance.ResumeSpawn();
+            SpeedManager.Instance.ResumeSpeed();
+        }
+        else
+        {
+            // START new game
+            gameState = GameState.Ready;
+
+            uiMenu.SetActive(false);
+            uiReady.SetActive(true);
+
+            player.GetComponent<PlayerManager>().enabled = true;
+        }
+    }
+
     void HandleRestart()
     {
+        SpeedManager.Instance.ResetSpeed();
         SceneManager.LoadScene("Main");
     }
 
-    void HandleExit() 
+    void HandleExit()
     {
-        if (Input.GetKeyDown("escape")) Application.Quit();
+        if (Input.GetKeyDown("escape"))
+        {
+            Application.Quit();
+        }
     }
 }
