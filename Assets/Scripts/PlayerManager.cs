@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
@@ -9,18 +8,25 @@ public class PlayerManager : MonoBehaviour
     public Animator animator;
     public bool invencible = false;
     public bool enemyCollision = false, grounded;
-    float startY;
 
+    private float startY;
     private Coroutine invencibleCoroutine;
+
+    [Header("UI")]
+    public InvencibilidadUI invencibilidadUI; // Asignar en el inspector
 
     void Awake()
     {
         Instance = this;
     }
-
     void Start()
     {
         startY = transform.position.y;
+
+        if (invencibilidadUI == null)
+        {
+            invencibilidadUI = FindObjectOfType<InvencibilidadUI>();
+        }
     }
 
     void Update()
@@ -33,26 +39,26 @@ public class PlayerManager : MonoBehaviour
         animator.Play(name);
         if (name == "PlayerJump")
         {
-            AudioManager.Instance.PlaySound("Jump");
+            AudioManager.Instance?.PlaySound("Jump");
         }
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.tag == "Enemy")
+        if (collider.CompareTag("Enemy"))
         {
             if (!invencible)
             {
                 enemyCollision = true;
                 GetComponent<BoxCollider2D>().enabled = false;
-                AudioManager.Instance.StopMusic();
-                AudioManager.Instance.PlaySound("Die");
+                AudioManager.Instance?.StopMusic();
+                AudioManager.Instance?.PlaySound("Die");
             }
         }
-        else if (collider.tag == "Points")
+        else if (collider.CompareTag("Points"))
         {
-            ScoreManager.Instance.IncreasePoints();
-            AudioManager.Instance.PlaySound("Point");
+            ScoreManager.Instance?.IncreasePoints();
+            AudioManager.Instance?.PlaySound("Point");
         }
     }
 
@@ -64,19 +70,20 @@ public class PlayerManager : MonoBehaviour
         }
 
         invencibleCoroutine = StartCoroutine(InvencibleTemporal(duracion));
+
+        if (invencibilidadUI != null)
+            invencibilidadUI.ActivarBarra(duracion);
     }
 
     IEnumerator InvencibleTemporal(float duracion)
     {
         invencible = true;
         GetComponent<SpriteRenderer>().color = Color.yellow;
-        AudioManager.Instance.PlaySound("PowerUp");
+        AudioManager.Instance?.PlaySound("PowerUp");
 
-        // Espera real, sin verse afectada por Time.timeScale
         yield return new WaitForSecondsRealtime(duracion);
 
         invencible = false;
         GetComponent<SpriteRenderer>().color = Color.white;
     }
-
 }
