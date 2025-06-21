@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
@@ -7,30 +6,50 @@ public class SpawnManager : MonoBehaviour
     public static SpawnManager Instance { get; private set; }
 
     public GameObject enemyPrefab;
+    public float spawnInterval = 2f;
 
-    public float spawnTimer = 2f;
+    private Coroutine spawnCoroutine;
+    private bool isPaused = false;
 
     void Awake()
     {
         Instance = this;
     }
 
-    // Iniciar la generación
     public void StartSpawn()
     {
-        InvokeRepeating("SpawnEnemy", 0f, spawnTimer);
+        isPaused = false;
+        if (spawnCoroutine == null)
+            spawnCoroutine = StartCoroutine(SpawnLoop());
     }
 
-    // Encargado de generar el enemigo
-    void SpawnEnemy()
+    public void PauseSpawn()
     {
-        Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+        isPaused = true;
     }
 
-    // Parar la generación
+    public void ResumeSpawn()
+    {
+        isPaused = false;
+    }
+
     public void StopSpawn()
     {
-        CancelInvoke("SpawnEnemy");
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+        }
     }
 
+    IEnumerator SpawnLoop()
+    {
+        while (true)
+        {
+            if (!isPaused)
+                Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+
+            yield return new WaitForSeconds(spawnInterval);
+        }
+    }
 }
