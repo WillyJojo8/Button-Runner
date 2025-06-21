@@ -20,11 +20,16 @@ public class ScoreManager : MonoBehaviour
         UpdateMaxPoints();
     }
 
-    public void IncreasePoints()
+    public void IncreasePoints(int cantidad = 1)
     {
-        points++;
+        points += cantidad;
         pointsText.text = points.ToString();
         UpdateMaxPoints();
+    }
+
+    public void IncreaseCoinPoints()
+    {
+        IncreasePoints(5); // Añade 5 puntos por moneda
     }
 
     public void UpdateMaxPoints()
@@ -39,5 +44,4 @@ public class ScoreManager : MonoBehaviour
 
         maxPointsText.text = "BEST: " + maxPoints.ToString();
     }
-
 }
