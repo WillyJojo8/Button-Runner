@@ -24,7 +24,7 @@ public class CreditManager : MonoBehaviour
             var clipName = creditAnimation.clip.name;
             creditAnimation[clipName].speed = speed;
 
-            if (!creditAnimation.IsPlaying(clipName))
+            if (!creditAnimation.IsPlaying(clipName) || Input.GetKeyDown(KeyCode.Escape))
             {
                 SceneManager.LoadScene(nextSceneName);
             }

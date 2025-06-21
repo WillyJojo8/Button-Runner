@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     {
         if (gameState != GameState.Menu)
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape) && gameState != GameState.Ended)
             {
                 HandleTogglePause();
                 return;
@@ -73,6 +73,7 @@ public class GameManager : MonoBehaviour
             SpawnManager.Instance.PauseSpawn();
             ItemSpawner.Instance.PauseSpawn();
             SpeedManager.Instance.PauseSpeed();
+            InvencibilidadUI.Instance.PauseBar();
             player.GetComponent<PlayerManager>().enabled = false;
         }
     }
@@ -95,11 +96,34 @@ public class GameManager : MonoBehaviour
         if (gameState == GameState.Ready && action)
         {
             gameState = GameState.Playing;
-
             Time.timeScale = 1f; // Normal time scale for new game
-
             uiReady.SetActive(false);
             uiScore.SetActive(true);
+
+            if(isPaused)
+            {
+                isPaused = false;
+                player.transform.position = pausedPlayerPosition;
+            
+                Time.timeScale = 1f; // Resume normal time scale
+
+                player.GetComponent<PlayerManager>().enabled = true;
+            
+                // Restore the correct animation state
+                PlayerManager.Instance.SetAnimation(pausedAnimationState);
+
+                SpawnManager.Instance.ResumeSpawn();
+                ItemSpawner.Instance.ResumeSpawn();
+                SpeedManager.Instance.ResumeSpeed();
+                InvencibilidadUI.Instance.ResumeBar();
+            
+            }
+            else
+            {
+            
+
+
+
 
             player.GetComponent<PlayerManager>().enabled = true;
             PlayerManager.Instance.SetAnimation("PlayerRun");
@@ -107,6 +131,8 @@ public class GameManager : MonoBehaviour
             SpawnManager.Instance.StartSpawn();
             ItemSpawner.Instance.StartSpawn();
             SpeedManager.Instance.StartSpeedIncrease();
+            }
+            
         }
         else if (gameState == GameState.Ended && action)
         {
@@ -126,39 +152,19 @@ public class GameManager : MonoBehaviour
 
   public void HandlePlay()
     {
-        if (isPaused)
+        if (!isPaused)
         {
-            // RESUME from pause
-            isPaused = false;
-            gameState = GameState.Playing;
-            
-            // Restore player position and animation
-            player.transform.position = pausedPlayerPosition;
-            
-            Time.timeScale = 1f; // Resume normal time scale
-
-            uiMenu.SetActive(false);
-            uiScore.SetActive(true);
-
-            player.GetComponent<PlayerManager>().enabled = true;
-            
-            // Restore the correct animation state
-            PlayerManager.Instance.SetAnimation(pausedAnimationState);
-
-            SpawnManager.Instance.ResumeSpawn();
-            ItemSpawner.Instance.ResumeSpawn();
-            SpeedManager.Instance.ResumeSpeed();
-        }
-        else
-        {
+            player.GetComponent<PlayerManager>().enabled = true;        
+            }
+        
+        
             // START new game
             gameState = GameState.Ready;
 
             uiMenu.SetActive(false);
             uiReady.SetActive(true);
 
-            player.GetComponent<PlayerManager>().enabled = true;
-        }
+        
     }
 
     void HandleRestart()
@@ -174,4 +180,13 @@ public class GameManager : MonoBehaviour
             Application.Quit();
         }
     }
+
+
+
+    public void LoadCredits()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Credits");
+    }
+
 }
