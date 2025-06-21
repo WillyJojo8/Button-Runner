@@ -69,12 +69,14 @@ public class PlayerManager : MonoBehaviour
     IEnumerator InvencibleTemporal(float duracion)
     {
         invencible = true;
-        GetComponent<SpriteRenderer>().color = Color.yellow; // Indicador visual
+        GetComponent<SpriteRenderer>().color = Color.yellow;
         AudioManager.Instance.PlaySound("PowerUp");
 
-        yield return new WaitForSeconds(duracion);
+        // Espera real, sin verse afectada por Time.timeScale
+        yield return new WaitForSecondsRealtime(duracion);
 
         invencible = false;
         GetComponent<SpriteRenderer>().color = Color.white;
     }
+
 }

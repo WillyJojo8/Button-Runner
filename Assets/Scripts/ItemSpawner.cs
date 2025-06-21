@@ -58,7 +58,7 @@ public class ItemSpawner : MonoBehaviour
             if (!isPaused)
                 TrySpawnItem();
 
-            yield return new WaitForSeconds(spawnInterval);
+            yield return new WaitForSecondsRealtime(spawnInterval);
         }
     }
 
