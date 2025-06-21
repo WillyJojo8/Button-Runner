@@ -8,7 +8,6 @@ public class PowerBox : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             PlayerManager.Instance.ActivarInvencibilidad(duracionInvencible);
-            AudioManager.Instance.PlayLongSound("powerUp");
             Destroy(gameObject);
         }
     }
