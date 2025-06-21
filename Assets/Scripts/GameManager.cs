@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
             uiMenu.SetActive(true);
 
             SpawnManager.Instance.PauseSpawn();
+            ItemSpawner.Instance.PauseSpawn();
             SpeedManager.Instance.PauseSpeed();
             player.GetComponent<PlayerManager>().enabled = false;
         }
@@ -84,6 +85,7 @@ public class GameManager : MonoBehaviour
             gameState = GameState.Ended;
             PlayerManager.Instance.SetAnimation("PlayerDie");
             SpawnManager.Instance.StopSpawn();
+            ItemSpawner.Instance.StopSpawn();
             SpeedManager.Instance.ResetSpeed();
         }
     }
@@ -103,6 +105,7 @@ public class GameManager : MonoBehaviour
             PlayerManager.Instance.SetAnimation("PlayerRun");
 
             SpawnManager.Instance.StartSpawn();
+            ItemSpawner.Instance.StartSpawn();
             SpeedManager.Instance.StartSpeedIncrease();
         }
         else if (gameState == GameState.Ended && action)
@@ -143,6 +146,7 @@ public class GameManager : MonoBehaviour
             PlayerManager.Instance.SetAnimation(pausedAnimationState);
 
             SpawnManager.Instance.ResumeSpawn();
+            ItemSpawner.Instance.ResumeSpawn();
             SpeedManager.Instance.ResumeSpeed();
         }
         else

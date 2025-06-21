@@ -7,8 +7,11 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance { get; private set; }
 
     public Animator animator;
+    public bool invencible = false;
     public bool enemyCollision = false, grounded;
     float startY;
+
+    private Coroutine invencibleCoroutine;
 
     void Awake()
     {
@@ -38,15 +41,40 @@ public class PlayerManager : MonoBehaviour
     {
         if (collider.tag == "Enemy")
         {
-            enemyCollision = true;
-            GetComponent<BoxCollider2D>().enabled = false;
-            AudioManager.Instance.StopMusic();
-            AudioManager.Instance.PlaySound("Die");
+            if (!invencible)
+            {
+                enemyCollision = true;
+                GetComponent<BoxCollider2D>().enabled = false;
+                AudioManager.Instance.StopMusic();
+                AudioManager.Instance.PlaySound("Die");
+            }
         }
-        else if (collider.tag == "Points") { 
+        else if (collider.tag == "Points")
+        {
             ScoreManager.Instance.IncreasePoints();
             AudioManager.Instance.PlaySound("Point");
         }
     }
 
+    public void ActivarInvencibilidad(float duracion)
+    {
+        if (invencibleCoroutine != null)
+        {
+            StopCoroutine(invencibleCoroutine);
+        }
+
+        invencibleCoroutine = StartCoroutine(InvencibleTemporal(duracion));
+    }
+
+    IEnumerator InvencibleTemporal(float duracion)
+    {
+        invencible = true;
+        GetComponent<SpriteRenderer>().color = Color.yellow; // Indicador visual
+        AudioManager.Instance.PlaySound("PowerUp");
+
+        yield return new WaitForSeconds(duracion);
+
+        invencible = false;
+        GetComponent<SpriteRenderer>().color = Color.white;
+    }
 }
