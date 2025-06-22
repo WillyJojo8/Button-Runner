@@ -100,4 +100,10 @@ public class InvencibilidadUI : MonoBehaviour
             particleSystem.Play();
         }
     }
+
+
+    public bool BarraActiva()
+    {
+        return activa;
+    }
 }

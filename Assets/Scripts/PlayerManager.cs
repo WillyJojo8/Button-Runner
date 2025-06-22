@@ -1,24 +1,29 @@
-using System.Collections;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Instance { get; private set; }
 
+    [Header("Referencias")]
     public Animator animator;
+    public InvencibilidadUI invencibilidadUI; // Asignar en el inspector
+
+    [Header("Estado del jugador")]
     public bool invencible = false;
-    public bool enemyCollision = false, grounded;
+    public bool enemyCollision = false;
+    public bool grounded;
 
     private float startY;
-    private Coroutine invencibleCoroutine;
 
-    [Header("UI")]
-    public InvencibilidadUI invencibilidadUI; // Asignar en el inspector
+    // Invencibilidad controlada por tiempo
+    private float tiempoInvencibilidad = 0f;
+    private bool invencibilidadActiva = false;
 
     void Awake()
     {
         Instance = this;
     }
+
     void Start()
     {
         startY = transform.position.y;
@@ -32,11 +37,22 @@ public class PlayerManager : MonoBehaviour
     void Update()
     {
         grounded = transform.position.y == startY;
+
+        if (invencibilidadActiva)
+        {
+            tiempoInvencibilidad -= Time.unscaledDeltaTime;
+
+            if (tiempoInvencibilidad <= 0f)
+            {
+                FinalizarInvencibilidad();
+            }
+        }
     }
 
     public void SetAnimation(string name)
     {
         animator.Play(name);
+
         if (name == "PlayerJump")
         {
             AudioManager.Instance?.PlaySound("Jump");
@@ -64,26 +80,27 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivarInvencibilidad(float duracion)
     {
-        if (invencibleCoroutine != null)
-        {
-            StopCoroutine(invencibleCoroutine);
-        }
-
-        invencibleCoroutine = StartCoroutine(InvencibleTemporal(duracion));
-
-        if (invencibilidadUI != null)
-            invencibilidadUI.ActivarBarra(duracion);
-    }
-
-    IEnumerator InvencibleTemporal(float duracion)
-    {
+        tiempoInvencibilidad = duracion;
+        invencibilidadActiva = true;
         invencible = true;
+
         GetComponent<SpriteRenderer>().color = Color.yellow;
         AudioManager.Instance?.PlaySound("PowerUp");
 
-        yield return new WaitForSecondsRealtime(duracion);
+        if (invencibilidadUI != null)
+        {
+            invencibilidadUI.ActivarBarra(duracion);
+        }
+    }
 
+    private void FinalizarInvencibilidad()
+    {
+        invencibilidadActiva = false;
         invencible = false;
+
         GetComponent<SpriteRenderer>().color = Color.white;
+
+        // Puedes notificar al UI si quieres que se oculte inmediatamente
+        // invencibilidadUI?.ForzarFinalizacion(); // si decides agregar ese método
     }
 }
