@@ -15,7 +15,6 @@ public class CreditManager : MonoBehaviour
 
     void Update()
     {
-        // Aceleración (ya lo tienes)
         bool accelerating = Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0);
         float speed = accelerating ? 4f : 1f;
 

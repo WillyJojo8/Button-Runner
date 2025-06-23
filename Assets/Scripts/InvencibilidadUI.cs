@@ -27,7 +27,7 @@ public class InvencibilidadUI : MonoBehaviour
 
     void Start()
     {
-        gameObject.SetActive(false); // Ocultar al inicio
+        gameObject.SetActive(false); 
     }
 
     void Update()

@@ -6,7 +6,7 @@ public class PlayerManager : MonoBehaviour
 
     [Header("Referencias")]
     public Animator animator;
-    public InvencibilidadUI invencibilidadUI; // Asignar en el inspector
+    public InvencibilidadUI invencibilidadUI;
 
     [Header("Estado del jugador")]
     public bool invencible = false;
@@ -99,8 +99,5 @@ public class PlayerManager : MonoBehaviour
         invencible = false;
 
         GetComponent<SpriteRenderer>().color = Color.white;
-
-        // Puedes notificar al UI si quieres que se oculte inmediatamente
-        // invencibilidadUI?.ForzarFinalizacion(); // si decides agregar ese método
     }
 }
